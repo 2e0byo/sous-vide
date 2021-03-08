@@ -1,5 +1,6 @@
 import micropython
-from machine import Pin, Timer
+import utime
+from machine import Pin, Timer, disable_irq, enable_irq
 
 
 class settablePin(Pin):
@@ -128,5 +129,74 @@ class SevenSegment:
         self.dim = 5 - br
         self.count = 0
 
+
+def tdiff():
+    new_semantics = utime.ticks_diff(2, 1) == 1
+
+    def func(old, new):
+        nonlocal new_semantics
+        if new_semantics:
+            return utime.ticks_diff(new, old)
+        return utime.ticks_diff(old, new)
+
+    return func
+
+
+ticksdiff = tdiff()
+
+
+class EncoderTimed(object):
+    def __init__(self, pin_x, pin_y, reverse, scale):
+        self.reverse = reverse
+        self.scale = scale
+        self.tprev = 0
+        self.tlast = 0
+        self.forward = True
+        self.pin_x = pin_x
+        self.pin_y = pin_y
+        self._pos = 0
+        self.x_interrupt = pin_x.irq(
+            handler=self.x_callback, trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING
+        )
+        self.y_interrupt = pin_y.irq(
+            handler=self.y_callback, trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING
+        )
+
+    def x_callback(self, line):
+        self.forward = self.pin_x.value() ^ self.pin_y.value() ^ self.reverse
+        self._pos += 1 if self.forward else -1
+        self.tprev = self.tlast
+        self.tlast = utime.ticks_us()
+
+    def y_callback(self, line):
+        self.forward = self.pin_x.value() ^ self.pin_y.value() ^ self.reverse ^ 1
+        self._pos += 1 if self.forward else -1
+        self.tprev = self.tlast
+        self.tlast = utime.ticks_us()
+
+    @property
+    def rate(self):  # Return rate in edges per second
+        if not self.tprev:
+            return 0
+        irq = disable_irq()
+        tprev = self.tprev
+        tlast = self.tlast
+        enable_irq(irq)
+        if utime.ticks_diff(utime.ticks_us(), tlast) > 2000000:  # It's stopped
+            result = 0.0
+        else:
+            result = 1000000.0 / (utime.ticks_diff(tlast, tprev))
+        result *= self.scale
+        return result if self.forward else -result
+
+    @property
+    def position(self):
+        return self._pos * self.scale
+
+    def reset(self):
+        self._pos = 0
+
+
+encoder = EncoderTimed(rot_left, rot_right, False, 1)
 
 seven_seg = SevenSegment(seg, digits)
