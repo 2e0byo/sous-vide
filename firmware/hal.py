@@ -1,4 +1,5 @@
 import micropython
+import uasyncio as asyncio
 import utime
 from machine import Pin, Timer, disable_irq, enable_irq
 
@@ -91,7 +92,12 @@ class SevenSegment:
         self.reset = False
 
         self.disp_timer = Timer(0)
-        self.disp_timer.init(period=5, mode=Timer.PERIODIC, callback=self._disp)
+        # self.disp_timer.init(period=5, mode=Timer.PERIODIC, callback=self._disp)
+
+    async def main(self):
+        while True:
+            self._disp(0)
+            await asyncio.sleep_ms(1)
 
     def _compute_masks(self):
         self.font_masks = {}
@@ -236,12 +242,16 @@ encoder = EncoderTimed(rot_left, rot_right, False, 1)
 import machine
 
 machine.freq(160000000)
-while True:
-    # seven_seg.print("{:4}".format(encoder.position))
-    # seven_seg.print("%4i" % encoder.position)
-    # a = "{:4}".format(encoder.position)
-    # a = "{:4}".format(12)
-    a = "%4i" % 12
-    # seven_seg.print(" 196")
-    # seven_seg.print("hi")
-    utime.sleep(1)
+
+
+async def aloop():
+    while True:
+        a = "%4i" % encoder.position
+        seven_seg.print(a)
+        await asyncio.sleep(1)
+
+
+loop = asyncio.get_event_loop()
+loop.create_task(aloop())
+loop.create_task(seven_seg.main())
+loop.run_forever()
