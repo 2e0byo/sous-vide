@@ -130,21 +130,6 @@ class SevenSegment:
         self.count = 0
 
 
-def tdiff():
-    new_semantics = utime.ticks_diff(2, 1) == 1
-
-    def func(old, new):
-        nonlocal new_semantics
-        if new_semantics:
-            return utime.ticks_diff(new, old)
-        return utime.ticks_diff(old, new)
-
-    return func
-
-
-ticksdiff = tdiff()
-
-
 class EncoderTimed(object):
     def __init__(self, pin_x, pin_y, reverse, scale):
         self.reverse = reverse
