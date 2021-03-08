@@ -80,32 +80,53 @@ class SevenSegment:
         self.digits_pins = tuple(
             (settablePin(i, settablePin.OPEN_DRAIN) for i in digits)
         )
-        self.chars = bytearray(4)
+        self.chars = [0, 0, 0, 0]
         self.digit_index = 0
         self.dim = 1
         self.count = 0
 
         self._compute_masks()
+        self.display("ave ")
 
         self.disp_timer = Timer(0)
-        self.disp_timer.init(period=5, mode=Timer.PERIODIC, callback=self._disp)
-        self.display("ave ")
+        self.disp_timer.init(period=1, mode=Timer.PERIODIC, callback=self._disp)
 
     def _compute_masks(self):
         self.font_masks = {}
+
         for k, v in self.font.items():
             lower_mask = 0
             upper_mask = 0
             for i in range(8):
-                if self.seg[i] < 32:
+                if self.seg[i] < 31:
                     if v & 1 << i:
                         lower_mask |= 1 << self.seg[i]
                 else:
                     if v & 1 << i:
-                        upper_mask |= 1 << self.seg[i]
+                        upper_mask |= 1 << (self.seg[i] - 32)
             self.font_masks[k] = (lower_mask, upper_mask)
 
-    # consider using stm to edit the gpio register in one step.
+        self.lower_digit_masks = []
+        self.upper_digit_masks = []
+        for v in self.digits:
+            if v < 31:
+                self.lower_digit_masks.append(1 << v)
+            else:
+                self.upper_digit_masks.append(1 << v - 32)
+
+        lower_mask = 0
+        upper_mask = 0
+        for i in range(8):
+            if self.seg[i] < 31:
+                lower_mask |= 1 << self.seg[i]
+            else:
+                upper_mask |= 1 << (self.seg[i] - 32)
+        self.lower_mask = lower_mask
+        self.upper_mask = upper_mask
+
+        self.lower_dp_mask = 1 << self.seg[-1] if self.seg[-1] < 31 else 0
+        self.upper_dp_mask = 1 << self.seg[-1] - 32 if self.seg[-1] > 31 else 0
+
     @micropython.native
     def _disp(self, p):
         irq = disable_irq()
@@ -116,26 +137,56 @@ class SevenSegment:
         #     for i in range(8):
         #         self.seg_pins[i].val = 0
         #     return
-
-        self.digits_pins[self.digit_index].val = 0
+        self._viper_set(self.lower_digit_masks[self.digit_index])
         self.digit_index += 1
         self.digit_index &= 3
-        for i in range(8):
-            self.seg_pins[i].val = self.chars[self.digit_index] >> i & 1
-        self.digits_pins[self.digit_index].val = 1
+        self._viper_disp(*self.chars[self.digit_index])
+        self._viper_unset(self.lower_digit_masks[self.digit_index])
         enable_irq(irq)
+
+    # @staticmethod
+    @micropython.viper
+    def _viper_disp(self, lower_mask: int, upper_mask: int):
+        GPIO = ptr32(0x3FF44004)  # noqa
+        # mask = int(0x5ECE0000)
+        mask = int(self.lower_mask)
+        GPIO[1] = mask
+        GPIO[2] = lower_mask
+        # gpio[2] = int(lower_mask & mask)
+        GPIO = ptr32(0x3FF44010)  # noqa
+        # mask = int(0x6)
+        mask = int(self.upper_mask)
+        GPIO[1] = mask
+        GPIO[2] = upper_mask
+        # GPIO[2] = int(~upper_mask & mask)
+
+    @staticmethod
+    @micropython.viper
+    def _viper_set(mask: int):
+        GPIO = ptr32(0x3FF44004)  # noqa
+        GPIO[1] = mask
+
+    @staticmethod
+    @micropython.viper
+    def _viper_unset(mask: int):
+        GPIO = ptr32(0x3FF44004)  # noqa
+        GPIO[2] = mask
 
     def display(self, s):
         i = 0
         for char in str(s):
             if char == ".":
                 if i:
-                    self.chars[i - 1] |= 1 << 7
+                    lower = self.chars[i - 1][0] | self.lower_dp_mask
+                    upper = self.chars[i - 1][1] | self.upper_dp_mask
+                    self.chars[i - 1] = (lower, upper)
                     continue
                 else:
-                    self.chars[i] = 1 << 7
+                    lower = self.lower_dp_mask
+                    upper = self.upper_dp_mask
+                    self.chars[i] = (lower, upper)
             else:
-                self.chars[i] = self.font[char]
+                self.chars[i] = self.font_masks[char]
 
             i += 1
             if i == 4:
@@ -192,9 +243,9 @@ class EncoderTimed(object):
 seven_seg = SevenSegment(seg, digits)
 encoder = EncoderTimed(rot_left, rot_right, False, 1)
 
-# while True:
-#     seven_seg.display("{:4}".format(encoder.position))
-#     utime.sleep(0.5)
+while True:
+    seven_seg.display("{:4}".format(encoder.position))
+    utime.sleep(0.5)
 
 
 @micropython.viper
