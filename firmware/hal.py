@@ -114,4 +114,4 @@ def display(s):
 
 disp_timer = Timer(0)
 disp_timer.init(period=3, mode=Timer.PERIODIC, callback=_disp)
-display("hi  ")
+display("ave ")
