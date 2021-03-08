@@ -28,6 +28,7 @@ button = settablePin(23, settablePin.IN, settablePin.PULL_UP)
 rot_left = settablePin(35, settablePin.IN, settablePin.PULL_UP)
 rot_right = settablePin(34, settablePin.IN, settablePin.PULL_UP)
 
+
 font = {
     " ": 0,
     "0": 63,
@@ -67,27 +68,24 @@ font = {
     "y": 110,
     "z": 91,
 }
-
 chars = bytearray(4)
-
-for i in range(1, 4):
-    digits[i].val = 0
-
-
-# def disp(char, dp=False):
-#     segs = font[str(char)] | dp << 7
-#     for i in range(8):
-#         seg[i].val = segs >> i & 1
-
-
 digit_index = 0
-dim = 2
+dim = 1
 count = 0
 
 
+# consider using stm to edit the gpio register in one step.
 @micropython.native
-def disp(p):
-    global digit_index  # , count
+def _disp(p):
+    global digit_index, count
+    count += 1
+    if count == dim:
+        count = 0
+    if count > 1:
+        for i in range(8):
+            seg[i].val = 0
+        return
+
     digits[digit_index].val = 0
     digit_index += 1
     digit_index &= 3
@@ -96,10 +94,10 @@ def disp(p):
     digits[digit_index].val = 1
 
 
-def display(s: str):
+def display(s):
     global chars
     i = 0
-    for char in s:
+    for char in str(s):
         if char == ".":
             if i:
                 chars[i - 1] |= 1 << 7
@@ -115,5 +113,5 @@ def display(s: str):
 
 
 disp_timer = Timer(0)
-disp_timer.init(period=5, mode=Timer.PERIODIC, callback=disp)
+disp_timer.init(period=3, mode=Timer.PERIODIC, callback=_disp)
 display("hi  ")
