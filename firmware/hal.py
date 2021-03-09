@@ -1,6 +1,9 @@
+import machine
 import micropython
-import utime
+import uasyncio as asyncio
 from machine import Pin, Timer, disable_irq, enable_irq
+
+machine.freq(160000000)
 
 
 class settablePin(Pin):
@@ -91,7 +94,13 @@ class SevenSegment:
         self.reset = False
 
         self.disp_timer = Timer(0)
-        self.disp_timer.init(period=5, mode=Timer.PERIODIC, callback=self._disp)
+        self.init_timer()
+
+    def init_timer(self, period=5):
+        self.period = period
+        self.disp_timer.init(
+            period=self.period, mode=Timer.PERIODIC, callback=self._disp
+        )
 
     def _compute_masks(self):
         self.font_masks = {}
@@ -233,15 +242,27 @@ class EncoderTimed(object):
 
 seven_seg = SevenSegment(seg, digits)
 encoder = EncoderTimed(rot_left, rot_right, False, 1)
-import machine
 
-machine.freq(160000000)
-while True:
-    # seven_seg.print("{:4}".format(encoder.position))
-    # seven_seg.print("%4i" % encoder.position)
-    # a = "{:4}".format(encoder.position)
-    # a = "{:4}".format(12)
-    a = "%4i" % 12
-    # seven_seg.print(" 196")
-    # seven_seg.print("hi")
-    utime.sleep(1)
+
+async def update_display():
+    while True:
+        # seven_seg.print("{:4}".format(encoder.position))
+        for i in range(100):
+            """{:4}""".format(encoder.position)
+        await asyncio.sleep(0.2)
+
+
+async def change_refresh_rate():
+    while True:
+        for i in range(1, 5):
+            print("setting refresh to", i)
+            await asyncio.sleep(2)
+            seven_seg.init_timer(i)
+
+
+seven_seg.print("vale")
+
+loop = asyncio.get_event_loop()
+loop.create_task(update_display())
+loop.create_task(change_refresh_rate())
+loop.run_forever()
