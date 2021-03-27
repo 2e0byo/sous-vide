@@ -14,8 +14,14 @@ async def set_param(
 
     hal.disp.show(name_)
 
+    old_fns = {}
+    old_attrs = ("ff", "fa", "df", "da", "lf", "la")
+    for x in old_attrs:
+        old_fns[x] = getattr(hal.button, x)
+
     inactive_ms = 0
-    hal.button.press_func(hal.set_push_flag)
+    hal.button.release_func(hal.set_push_flag)
+    hal.button.double_func(hal.set_double_flag)
     hal.encoder.position = param / step
 
     while (inactive_ms < timeout) and not hal.push_flag:
@@ -33,5 +39,8 @@ async def set_param(
         await asyncio.sleep(0.1)
         hal.disp.brightness(brightness)
         await asyncio.sleep(0.1)
+
+    for x in old_attrs:
+        setattr(hal.button, x, old_fns[x])
 
     return val
