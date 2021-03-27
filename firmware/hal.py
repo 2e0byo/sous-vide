@@ -1,6 +1,7 @@
 import ds18x20
 import micropython
 import onewire
+import uasyncio as asyncio
 from machine import Pin
 
 import tm1637
@@ -41,6 +42,13 @@ def detect_sensor():
         return None
     else:
         return roms[0]
+
+
+async def read_sensor(rom):
+    """Read sensor."""
+    ds.convert_temp()
+    await asyncio.sleep(0.75)
+    return ds.read_temp(rom)
 
 
 button = settablePin(23, settablePin.IN, settablePin.PULL_UP)
