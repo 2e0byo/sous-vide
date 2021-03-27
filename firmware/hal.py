@@ -18,7 +18,7 @@ class settablePin(Pin):
         self.value(value ^ 1)
 
 
-relay_pin = settablePin(13, settablePin.OUT)
+relay = settablePin(13, settablePin.OUT)
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
 # a, b, c, d, e, f, g,  dp

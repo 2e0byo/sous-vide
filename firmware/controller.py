@@ -13,11 +13,15 @@ async def set_param(
     """
 
     hal.disp.show(name_)
+    await asyncio.sleep(0.5)
 
     old_fns = {}
-    old_attrs = ("ff", "fa", "df", "da", "lf", "la")
+    old_attrs = ("_ff", "_fa", "_df", "_da", "_lf", "_la")
     for x in old_attrs:
-        old_fns[x] = getattr(hal.button, x)
+        try:
+            old_fns[x] = getattr(hal.button, x)
+        except AttributeError:
+            old_fns[x] = ()
 
     inactive_ms = 0
     hal.button.release_func(hal.set_push_flag)
@@ -40,6 +44,8 @@ async def set_param(
         hal.disp.brightness(brightness)
         await asyncio.sleep(0.1)
 
+    hal.button.double_func(old_fns["_df"], old_fns["_da"])
+    hal.button.long_func(old_fns["_lf"], old_fns["_la"])
     for x in old_attrs:
         setattr(hal.button, x, old_fns[x])
 
