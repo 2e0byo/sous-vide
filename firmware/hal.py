@@ -5,6 +5,7 @@ import uasyncio as asyncio
 from machine import Pin
 
 import tm1637
+from primitives.pushbutton import Pushbutton
 
 
 class settablePin(Pin):
@@ -51,7 +52,23 @@ async def read_sensor(rom):
     return ds.read_temp(rom)
 
 
-button = settablePin(23, settablePin.IN, settablePin.PULL_UP)
+button = Pin(23, Pin.IN, Pin.PULL_UP)
+push_flag = None
+double_flag = None
+
+
+def set_push_flag():
+    global push_flag
+    push_flag = True
+
+
+def set_double_flag():
+    global double_flag
+    double_flag = True
+
+
+button = Pushbutton(button, suppress=True)
+
 rot_left = settablePin(35, settablePin.IN, settablePin.PULL_UP)
 rot_right = settablePin(34, settablePin.IN, settablePin.PULL_UP)
 
