@@ -1,11 +1,21 @@
+import json
+
 import ds18x20
 import micropython
 import onewire
 import uasyncio as asyncio
-from machine import Pin
+from machine import PWM, Pin
 
+import PID
 import tm1637
 from primitives.pushbutton import Pushbutton
+
+config = {"kp": 1, "ki": 0.5, "kd": 0.5}
+try:
+    with open("config.json") as f:
+        config.update(json.load(f))
+except OSError:
+    pass
 
 
 class settablePin(Pin):
@@ -18,7 +28,8 @@ class settablePin(Pin):
         self.value(value ^ 1)
 
 
-relay = settablePin(13, settablePin.OUT)
+relay_pin = Pin(13, Pin.OUT)
+relay = PWM(relay_pin, freq=50, duty=0)
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
 # a, b, c, d, e, f, g,  dp
@@ -115,3 +126,5 @@ class EncoderTimed(object):
 encoder = EncoderTimed(rot_left, rot_right, False, 1)
 
 disp = tm1637.TM1637Decimal(clk=Pin(16), dio=Pin(17))
+
+pid = PID.PID(config["kp"], config["ki"], config["kd"], 75, None, (0, 1023), False)
