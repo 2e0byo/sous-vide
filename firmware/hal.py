@@ -104,6 +104,10 @@ class EncoderTimed(object):
     def position(self):
         return self._pos * self.scale
 
+    @position.setter
+    def position(self, pos):
+        self._pos = round(pos / self.scale)
+
     def reset(self):
         self._pos = 0
 
