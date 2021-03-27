@@ -1,11 +1,9 @@
-import machine
+import ds18x20
 import micropython
-import uasyncio as asyncio
-from machine import Pin, Timer, disable_irq, enable_irq
+import onewire
+from machine import Pin
 
 import tm1637
-
-machine.freq(160000000)
 
 
 class settablePin(Pin):
@@ -28,6 +26,22 @@ digits = (18, 22, 21, 19)
 
 
 sensor = settablePin(15)
+ow = onewire.OneWire(sensor)
+ds = ds18x20.DS18X20(ow)
+
+
+def detect_sensor():
+    """
+    Detect sensor if attached.
+
+    Returns rom if present else None.
+    """
+    roms = ds.scan()
+    if len(roms) != 1:
+        return None
+    else:
+        return roms[0]
+
 
 button = settablePin(23, settablePin.IN, settablePin.PULL_UP)
 rot_left = settablePin(35, settablePin.IN, settablePin.PULL_UP)
