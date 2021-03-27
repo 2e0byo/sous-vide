@@ -27,7 +27,7 @@ seg = (27, 26, 33, 25, 14, 17, 16, 32)
 digits = (18, 22, 21, 19)
 
 
-sensor = settablePin(15)
+sensor = Pin(15)
 ow = onewire.OneWire(sensor)
 ds = ds18x20.DS18X20(ow)
 
