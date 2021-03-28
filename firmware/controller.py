@@ -72,18 +72,28 @@ async def heat_loop():
         await asyncio.sleep(0.1)
 
 
-async def _start_controller():
+async def _manual_start_controller():
     global heat_enabled
     hal.encoder.position = hal.temp * 10
     hal.pid.setpoint = await set_param("set ", 75, 100, 30)
     heat_enabled = True
 
 
-def start_controller(loop):
-    loop.create_task(_start_controller())
+def manual_start_controller(loop):
+    loop.create_task(_manual_start_controller())
 
 
-async def _start_countdown():
+def start_controller():
+    global heat_enabled
+    heat_enabled = True
+
+
+def stop_controller():
+    global heat_enabled
+    heat_enabled = False
+
+
+async def _manual_start_countdown():
     global time_remaining
     hours = await set_param("hrs ", 0, 23, 0, formatstr="{:0>2}.00", step=1)
     mins = await set_param(
@@ -92,8 +102,8 @@ async def _start_countdown():
     time_remaining = hours * 3600 + mins * 60
 
 
-def start_countdown(loop):
-    loop.create_task(_start_countdown())
+def manual_start_countdown(loop):
+    loop.create_task(_manual_start_countdown())
 
 
 async def countdown_loop():

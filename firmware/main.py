@@ -63,8 +63,8 @@ async def main():
         await asyncio.sleep_ms(100)
     logger.info("Sensor connected!")
     controller.init(loop)
-    hal.button.release_func(controller.start_controller, args=(loop,))
-    hal.button.double_func(controller.start_countdown, args=(loop,))
+    hal.button.release_func(controller.manual_start_controller, args=(loop,))
+    hal.button.double_func(controller.manual_start_countdown, args=(loop,))
 
     while True:
         if hal.rom:
