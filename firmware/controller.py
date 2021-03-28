@@ -40,13 +40,7 @@ async def set_param(
         await asyncio.sleep(0.1)
 
     hal.push_flag = False
-    brightness = hal.disp.brightness()
-    for _ in range(2):
-        hal.disp.brightness(0)
-        await asyncio.sleep(0.1)
-        hal.disp.brightness(brightness)
-        await asyncio.sleep(0.1)
-
+    await flash_disp()
     hal.button.double_func(old_fns["_df"], old_fns["_da"])
     hal.button.long_func(old_fns["_lf"], old_fns["_la"])
     for x in old_attrs:
@@ -54,6 +48,15 @@ async def set_param(
 
     hal.display_lock = False
     return val
+
+
+async def flash_disp():
+    brightness = hal.disp.brightness()
+    for _ in range(2):
+        hal.disp.brightness(0)
+        await asyncio.sleep(0.1)
+        hal.disp.brightness(brightness)
+        await asyncio.sleep(0.1)
 
 
 async def heat_loop():
@@ -93,9 +96,14 @@ def stop_controller():
     heat_enabled = False
 
 
-def toggle():
+async def _toggle():
     global heat_enabled
     heat_enabled = False if heat_enabled else True
+    await flash_disp()
+
+
+def manual_toggle(loop):
+    loop.create_task(_toggle())
 
 
 async def _manual_start_countdown():

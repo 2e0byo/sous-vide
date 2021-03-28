@@ -65,7 +65,7 @@ async def main():
     controller.init(loop)
     hal.button.release_func(controller.manual_start_controller, args=(loop,))
     hal.button.double_func(controller.manual_start_countdown, args=(loop,))
-    hal.button.long_func(controller.toggle, args=())
+    hal.button.long_func(controller.manual_toggle, args=(loop,))
 
     while True:
         if hal.rom:
