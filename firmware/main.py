@@ -1,8 +1,8 @@
-import api
 import uasyncio as asyncio
 import ulogging as logging
 from secret import wifi_PSK, wifi_SSID
 
+import api
 import controller
 import hal
 
@@ -63,11 +63,13 @@ async def main():
         await asyncio.sleep_ms(100)
     logger.info("Sensor connected!")
     loop.create_task(controller.heat_loop())
+    hal.button.release_func(controller.start_controller, args=(loop,))
+    hal.button.double_func(controller.start_countdown, args=(loop,))
 
     while True:
         if hal.rom:
             logger.info("Sensor connected!")
-        while hal.rom:
+        while hal.rom and not hal.display_lock:
             for _ in range(5):
                 disp_temp = str(hal.temp)[:4]
                 if "." not in disp_temp:
@@ -82,7 +84,7 @@ async def main():
                     hal.disp.show("{:02}.{:02}".format(*divmod(t, 60)))
                     await asyncio.sleep(1)
         logger.info("Awaiting sensor connection.")
-        while not hal.rom:
+        while not hal.rom or hal.display_lock:
             await asyncio.sleep_ms(100)
 
 

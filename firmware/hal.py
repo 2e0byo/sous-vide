@@ -28,6 +28,8 @@ class settablePin(Pin):
         self.value(value ^ 1)
 
 
+display_lock = False
+
 relay_pin = Pin(13, Pin.OUT)
 relay = PWM(relay_pin, freq=50, duty=0)
 

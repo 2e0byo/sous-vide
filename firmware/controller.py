@@ -14,7 +14,7 @@ async def set_param(
 
     Click to exit.  Times out after timeout ms.
     """
-
+    hal.display_lock = True
     hal.disp.show(name_)
     await asyncio.sleep(0.5)
 
@@ -52,6 +52,7 @@ async def set_param(
     for x in old_attrs:
         setattr(hal.button, x, old_fns[x])
 
+    hal.display_lock = False()
     return val
 
 
@@ -72,8 +73,23 @@ async def heat_loop():
         await asyncio.sleep(0.1)
 
 
-async def start_controller():
+async def _start_controller():
     global heat_enabled
     hal.encoder.position = hal.temp * 10
     hal.pid.setpoint = await set_param("set ", 75, 100, 30)
     heat_enabled = True
+
+
+def start_controller(loop):
+    loop.create_task(_start_controller())
+
+
+async def _start_countdown():
+    global time_remaining
+    hours = await set_param("hrs ", 0, 23, 0, formatstr="{:02}.00")
+    mins = await set_param("mins", 0, 59, 0, formatstr=str(hours) + ".{:02}")
+    time_remaining = hours * 3600 + mins * 60
+
+
+def start_countdown(loop):
+    loop.create_task(_start_countdown())
