@@ -99,6 +99,8 @@ def stop_controller():
 async def _toggle():
     global heat_enabled
     heat_enabled = False if heat_enabled else True
+    if not heat_enabled:
+        hal.relay.duty(0)
     before = hal.display_lock
     hal.display_lock = True
     hal.disp.show("On  " if heat_enabled else "Off ")
