@@ -69,7 +69,7 @@ async def main():
         while hal.rom:
             for _ in range(5):
                 disp_temp = str(hal.temp)[:4]
-                if "." in disp_temp:
+                if "." not in disp_temp:
                     disp_temp = disp_temp[:3]
                 hal.disp.show("{0: >3}*".format(disp_temp))
                 await asyncio.sleep(1)
