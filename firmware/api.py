@@ -47,7 +47,7 @@ def set_pid_param(req, resp):
         raise Exception("Param not in {}".format(params))
     val = float(req.url_match.group(2))
 
-    if val < 0 or val > 1:
+    if val < 0 or val > 100:
         raise Exception("Val in wrong range")
     setattr(hal.pid, param, val)
 
