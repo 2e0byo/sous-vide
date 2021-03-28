@@ -99,7 +99,11 @@ def stop_controller():
 async def _toggle():
     global heat_enabled
     heat_enabled = False if heat_enabled else True
+    before = hal.display_lock
+    hal.display_lock = True
+    hal.disp.show("On  " if heat_enabled else "Off ")
     await flash_disp()
+    hal.display_lock = before
 
 
 def manual_toggle(loop):
