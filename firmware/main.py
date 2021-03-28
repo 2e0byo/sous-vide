@@ -62,7 +62,7 @@ async def main():
     while not hal.rom:
         await asyncio.sleep_ms(100)
     logger.info("Sensor connected!")
-    loop.create_task(controller.heat_loop())
+    controller.init(loop)
     hal.button.release_func(controller.start_controller, args=(loop,))
     hal.button.double_func(controller.start_countdown, args=(loop,))
 
@@ -71,6 +71,8 @@ async def main():
             logger.info("Sensor connected!")
         while hal.rom and not hal.display_lock:
             for _ in range(5):
+                if hal.display_lock:
+                    break
                 disp_temp = str(hal.temp)[:4]
                 if "." not in disp_temp:
                     disp_temp = disp_temp[:3]
@@ -78,6 +80,8 @@ async def main():
                 await asyncio.sleep(1)
             if controller.time_remaining:
                 for _ in range(5):
+                    if hal.display_lock:
+                        break
                     t = controller.time_remaining
                     if t > 3600:
                         t //= 60
