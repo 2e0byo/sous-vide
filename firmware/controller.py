@@ -67,7 +67,7 @@ async def heat_loop():
         while heat_enabled and hal.rom:
             val = hal.pid(hal.temp)
             hal.relay.duty(round(val))
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(hal.period)
         hal.pid.set_auto_mode(False)
         hal.relay.duty(0)
         await asyncio.sleep(0.1)

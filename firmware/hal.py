@@ -71,6 +71,8 @@ class softPWM:
 
 
 relay = softPWM(relay_pin, freq=0.005, duty=0)
+period = relay._period
+buzzer = PWM(Pin(25))
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
 # a, b, c, d, e, f, g,  dp
