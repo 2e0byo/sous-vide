@@ -46,14 +46,17 @@ class softPWM:
     def freq(self, f=None):
         if f:
             self._period = round(1000 / (f * 1023))
-            self.count = 0
+            self._reset = True
         return 1023000 / self._period
 
     def duty(self, d=None):
         if d:
             if d < 0 or d > 1023:
                 raise Exception("Duty must be between 0 and 1023")
+            old_duty = self._duty
             self._duty = d
+            if self._duty > old_duty:
+                self._reset = True
         return self._duty
 
     async def _loop(self):
