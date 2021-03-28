@@ -79,13 +79,18 @@ async def main():
                 hal.disp.show("{0: >3}*".format(disp_temp))
                 await asyncio.sleep(1)
             if controller.time_remaining:
-                for _ in range(5):
+                for i in range(6):
                     if hal.display_lock:
                         break
                     t = controller.time_remaining
+                    if not t:
+                        break
                     if t > 3600:
                         t //= 60
-                    hal.disp.show("{:02}.{:02}".format(*divmod(t, 60)))
+                    if i % 2:
+                        hal.disp.show("{:02}.{:02}".format(*divmod(t, 60)))
+                    else:
+                        hal.disp.show("{:02}{:02}".format(*divmod(t, 60)))
                     await asyncio.sleep(1)
         logger.info("Awaiting sensor connection.")
         while not hal.rom or hal.display_lock:
