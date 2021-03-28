@@ -52,7 +52,7 @@ async def set_param(
     for x in old_attrs:
         setattr(hal.button, x, old_fns[x])
 
-    hal.display_lock = False()
+    hal.display_lock = False
     return val
 
 
