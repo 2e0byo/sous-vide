@@ -72,7 +72,10 @@ class softPWM:
 
 relay = softPWM(relay_pin, freq=0.005, duty=0)
 period = relay._period
-buzzer = PWM(Pin(25), duty=0)
+buzzer = PWM(Pin(25), duty=0, freq=440)
+alarm_flag = False
+
+
 def save_button_fns():
     old_fns = {}
     old_attrs = ("_ff", "_fa", "_df", "_da", "_lf", "_la")
@@ -88,6 +91,30 @@ def restore_button_fns(old_fns):
     button.double_func(old_fns["_df"], old_fns["_da"])
     button.long_func(old_fns["_lf"], old_fns["_la"])
     button.release_func(old_fns["_ff"], old_fns["_fa"])
+
+
+def stop_alarm():
+    global alarm_flag
+    alarm_flag = False
+
+
+async def sound():
+    global alarm_flag
+    alarm_flag = True
+    old_fns = save_button_fns()
+    button.double_func(stop_alarm)
+    button.long_func(stop_alarm)
+    button.release_func(stop_alarm)
+
+    while alarm_flag:
+        for i in range(4):
+            buzzer.duty(512)
+            await asyncio.sleep_ms(50)
+            buzzer.duty(0)
+            await asyncio.sleep_ms(50)
+        await asyncio.sleep(1)
+    restore_button_fns(old_fns)
+
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
 # a, b, c, d, e, f, g,  dp
