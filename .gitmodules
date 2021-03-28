@@ -1,0 +1,6 @@
+[submodule "libs/micropython-async"]
+	path = libs/micropython-async
+	url = git@github.com:2e0byo/micropython-async.git
+[submodule "libs/simple-pid"]
+	path = libs/simple-pid
+	url = https://github.com/m-lundberg/simple-pid.git
