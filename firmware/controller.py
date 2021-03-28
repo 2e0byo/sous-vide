@@ -66,7 +66,6 @@ async def heat_loop():
             temp = await hal.read_sensor(rom)
             val = hal.pid(temp)
             hal.relay.duty(round(val))
-            print(val)
             await asyncio.sleep(0.1)
         hal.pid.set_auto_mode(False)
         hal.relay.duty(0)
@@ -86,10 +85,28 @@ def start_controller(loop):
 
 async def _start_countdown():
     global time_remaining
-    hours = await set_param("hrs ", 0, 23, 0, formatstr="{:02}.00")
-    mins = await set_param("mins", 0, 59, 0, formatstr=str(hours) + ".{:02}")
+    hours = await set_param("hrs ", 0, 23, 0, formatstr="{:0>2}.00", step=1)
+    mins = await set_param(
+        "mins", 0, 59, 0, formatstr="{:02}".format(hours) + ".{:0>2}", step=1
+    )
     time_remaining = hours * 3600 + mins * 60
 
 
 def start_countdown(loop):
     loop.create_task(_start_countdown())
+
+
+async def countdown_loop():
+    global time_remaining
+    while True:
+        while not time_remaining:
+            await asyncio.sleep(1)
+        while time_remaining:
+            time_remaining -= 1
+            if time_remaining == 0:
+                print("ring ring ring ring ring")  # implement alarm here
+
+
+def init(loop):
+    loop.create_task(heat_loop())
+    loop.create_task(countdown_loop())
