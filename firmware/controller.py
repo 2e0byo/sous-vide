@@ -115,6 +115,7 @@ async def countdown_loop():
             time_remaining -= 1
             if time_remaining == 0:
                 print("ring ring ring ring ring")  # implement alarm here
+            await asyncio.sleep(1)
 
 
 def start_countdown(secs):
