@@ -70,7 +70,7 @@ def stop_countdown(req, resp):
 @app.route(re.compile("^/api/pwm/freq/(.+)"), methods=["PUT"])
 def set_pwm_freq(req, resp):
     freq = float(req.url_match.group(1))
-    if freq > 3:
+    if freq > 1:
         raise Exception("Val in wrong range")
     hal.relay.freq(freq)
     hal.period = hal.relay._period
