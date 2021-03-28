@@ -1,6 +1,6 @@
-import logging
-
+import api
 import uasyncio as asyncio
+import ulogging as logging
 from secret import wifi_PSK, wifi_SSID
 
 import controller
@@ -55,6 +55,7 @@ async def wifi():
 async def main():
     logger.info("Booting up")
     hal.init(loop)
+    api.init(loop)
     loop.create_task(wifi())
     await boot_screen()
     logger.info("Awaiting sensor connection.")
