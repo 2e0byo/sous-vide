@@ -31,7 +31,46 @@ class settablePin(Pin):
 display_lock = False
 
 relay_pin = Pin(13, Pin.OUT)
-relay = PWM(relay_pin, freq=50, duty=0)
+
+
+class softPWM:
+    def __init__(self, pin, freq=0.005, duty=0):
+        self.pin = pin
+        self.pin.off()
+        self._duty = duty
+        self._period = None
+        self.freq(freq)
+        self._reset = False
+        asyncio.get_event_loop().create_task(self._loop())
+
+    def freq(self, f=None):
+        if f:
+            self.period = round(1000 / (f * 1023))
+            self.count = 0
+        return 1023000 / self.period
+
+    def duty(self, d=None):
+        if d:
+            if d < 0 or d > 1023:
+                raise Exception("Duty must be between 0 and 1023")
+            self._duty = d
+        return self._duty
+
+    async def _loop(self):
+        count = 0
+        while True:
+            if count == self._duty:
+                self.pin.off()
+            count += 1
+            if count > 1023 or self._reset:
+                self._reset = False
+                count = 0
+                if self._duty:
+                    self.pin.on()
+            await asyncio.sleep_ms(self.period)
+
+
+relay = softPWM(relay_pin, freq=0.005, duty=0)
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
 # a, b, c, d, e, f, g,  dp
