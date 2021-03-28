@@ -93,6 +93,11 @@ def stop_controller():
     heat_enabled = False
 
 
+def toggle():
+    global heat_enabled
+    heat_enabled = False if heat_enabled else True
+
+
 async def _manual_start_countdown():
     global time_remaining
     hours = await set_param("hrs ", 0, 23, 0, formatstr="{:0>2}.00", step=1)
@@ -115,6 +120,7 @@ async def countdown_loop():
             time_remaining -= 1
             if time_remaining == 0:
                 print("ring ring ring ring ring")  # implement alarm here
+                # arguably we don't want to stop the ncontroller!
             await asyncio.sleep(1)
 
 
