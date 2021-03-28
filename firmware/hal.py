@@ -73,6 +73,21 @@ class softPWM:
 relay = softPWM(relay_pin, freq=0.005, duty=0)
 period = relay._period
 buzzer = PWM(Pin(25), duty=0)
+def save_button_fns():
+    old_fns = {}
+    old_attrs = ("_ff", "_fa", "_df", "_da", "_lf", "_la")
+    for x in old_attrs:
+        try:
+            old_fns[x] = getattr(button, x)
+        except AttributeError:
+            old_fns[x] = ()
+    return old_fns
+
+
+def restore_button_fns(old_fns):
+    button.double_func(old_fns["_df"], old_fns["_da"])
+    button.long_func(old_fns["_lf"], old_fns["_la"])
+    button.release_func(old_fns["_ff"], old_fns["_fa"])
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
 # a, b, c, d, e, f, g,  dp
