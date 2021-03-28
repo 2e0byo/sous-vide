@@ -62,12 +62,10 @@ async def flash_disp():
 async def heat_loop():
     global heat_enabled
     while True:
-        if heat_enabled:
+        if heat_enabled and hal.rom:
             hal.pid.set_auto_mode(True)
-        while heat_enabled:
-            rom = hal.detect_sensor()
-            temp = await hal.read_sensor(rom)
-            val = hal.pid(temp)
+        while heat_enabled and hal.rom:
+            val = hal.pid(hal.temp)
             hal.relay.duty(round(val))
             await asyncio.sleep(0.1)
         hal.pid.set_auto_mode(False)
