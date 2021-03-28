@@ -35,7 +35,7 @@ async def set_param(
         val = hal.encoder.position * step
         hal.encoder.position = max(min_, min(val, max_)) / step
         val = hal.encoder.position * step
-        disp_val = str(val)[: len_ + 1] if "." in str(val) else str(val)[len_]
+        disp_val = str(val)[: len_ + 1] if "." in str(val) else str(val)[:len_]
         hal.disp.show(formatstr.format(disp_val))
         await asyncio.sleep(0.1)
 
