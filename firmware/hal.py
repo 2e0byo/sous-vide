@@ -10,7 +10,7 @@ import PID
 import tm1637
 from primitives.pushbutton import Pushbutton
 
-config = {"kp": 1, "ki": 0.5, "kd": 0.5}
+config = {"kp": 1, "ki": 0.5, "kd": 0.5, "brightness": 6}
 try:
     with open("config.json") as f:
         config.update(json.load(f))
@@ -41,6 +41,8 @@ digits = (18, 22, 21, 19)
 sensor = Pin(15)
 ow = onewire.OneWire(sensor)
 ds = ds18x20.DS18X20(ow)
+rom = None
+temp = None
 
 
 def detect_sensor():
@@ -59,8 +61,22 @@ def detect_sensor():
 async def read_sensor(rom):
     """Read sensor."""
     ds.convert_temp()
-    await asyncio.sleep(0.75)
+    await asyncio.sleep_ms(750)
     return ds.read_temp(rom)
+
+
+async def temp_loop():
+    global rom
+    global temp
+    while True:
+        while not (rom := detect_sensor()):
+            await asyncio.sleep_ms(200)
+        while rom:
+            try:
+                temp = await read_sensor(rom)
+            except onewire.OneWireError:
+                rom = None
+            await asyncio.sleep_ms(250)
 
 
 button = Pin(23, Pin.IN, Pin.PULL_UP)
@@ -128,3 +144,7 @@ encoder = EncoderTimed(rot_left, rot_right, False, 1)
 disp = tm1637.TM1637Decimal(clk=Pin(16), dio=Pin(17))
 
 pid = PID.PID(config["kp"], config["ki"], config["kd"], 75, None, (0, 1023), False)
+
+
+def init(loop):
+    loop.create_task(temp_loop())
