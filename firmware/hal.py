@@ -45,9 +45,9 @@ class softPWM:
 
     def freq(self, f=None):
         if f:
-            self.period = round(1000 / (f * 1023))
+            self._period = round(1000 / (f * 1023))
             self.count = 0
-        return 1023000 / self.period
+        return 1023000 / self._period
 
     def duty(self, d=None):
         if d:
@@ -67,7 +67,7 @@ class softPWM:
                 count = 0
                 if self._duty:
                     self.pin.on()
-            await asyncio.sleep_ms(self.period)
+            await asyncio.sleep_ms(self._period)
 
 
 relay = softPWM(relay_pin, freq=0.005, duty=0)
