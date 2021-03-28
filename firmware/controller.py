@@ -114,9 +114,9 @@ def manual_start_countdown(loop):
 async def countdown_loop():
     global time_remaining
     while True:
-        while not time_remaining:
+        while not time_remaining or not heat_enabled:
             await asyncio.sleep(1)
-        while time_remaining:
+        while time_remaining and heat_enabled:
             time_remaining -= 1
             if time_remaining == 0:
                 print("ring ring ring ring ring")  # implement alarm here
