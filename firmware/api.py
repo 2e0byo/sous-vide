@@ -27,13 +27,13 @@ def status(req, resp):
 
 @app.route("/api/status/off")
 def off(req, resp):
-    controller.heat_enabled = False
+    controller.stop_controller()
     yield from status(req, resp)
 
 
 @app.route("/api/status/on")
 def on(req, resp):
-    controller.heat_enabled = True
+    controller.start_controller()
     yield from status(req, resp)
 
 
@@ -49,6 +49,19 @@ def set_pid_param(req, resp):
         raise Exception("Val in wrong range")
     setattr(hal.pid, param, val)
 
+    yield from status(req, resp)
+
+
+@app.route(re.compile("^/api/countdown/start/([0-9]+)"), methods=["PUT"])
+def set_countdown(req, resp):
+    secs = int(req.url_match.group(1))
+    controller.start_countdown(secs)
+    yield from status(req, resp)
+
+
+@app.route("/api/countdown/stop", methods=["PUT"])
+def stop_countdown(req, resp):
+    controller.stop_countdown()
     yield from status(req, resp)
 
 

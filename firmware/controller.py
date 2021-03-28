@@ -117,6 +117,16 @@ async def countdown_loop():
                 print("ring ring ring ring ring")  # implement alarm here
 
 
+def start_countdown(secs):
+    global time_remaining
+    time_remaining = secs
+
+
+def stop_countdown():
+    global time_remaining
+    time_remaining = None
+
+
 def init(loop):
     loop.create_task(heat_loop())
     loop.create_task(countdown_loop())
