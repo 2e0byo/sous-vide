@@ -19,6 +19,7 @@ def status(req, resp):
             "Kp": hal.pid.Kp,
             "Ki": hal.pid.Ki,
             "Kd": hal.pid.Kd,
+            "countdown": controller.time_remaining,
         }
     )
     yield from picoweb.start_response(resp, content_type="application/json")
