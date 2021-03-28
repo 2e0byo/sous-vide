@@ -76,7 +76,7 @@ async def temp_loop():
         while rom:
             try:
                 temp = await read_sensor(rom)
-            except onewire.OneWireError:
+            except (onewire.OneWireError, Exception):
                 rom = None
             await asyncio.sleep_ms(250)
 
