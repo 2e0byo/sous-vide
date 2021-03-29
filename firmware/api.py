@@ -91,6 +91,16 @@ def set_brightness(req, resp):
     yield from status(req, resp)
 
 
+@app.route(re.compile("^/api/manual/(.+)"), methods=["Put"])
+def manual_output(req, resp):
+    duty = int(req.url_match.group(1))
+    if duty < 0 or duty > 1023:
+        raise Exception("Invalid input for duty")
+    controller.stop_controller()
+    hal.relay.duty(duty)
+    yield from status(req, resp)
+
+
 async def run_app():
     app.run(debug=True, host="0.0.0.0", port="80")
 
