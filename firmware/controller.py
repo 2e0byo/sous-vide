@@ -80,12 +80,14 @@ def manual_start_controller(loop):
 def start_controller():
     global heat_enabled
     heat_enabled = True
+    hal.pid.auto_mode = True
 
 
 def stop_controller():
     global heat_enabled
     heat_enabled = False
     hal.relay.duty(0)
+    hal.pid.auto_mode = False
     hal.pid.reset()
 
 
