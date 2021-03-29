@@ -85,6 +85,8 @@ def start_controller():
 def stop_controller():
     global heat_enabled
     heat_enabled = False
+    hal.relay.duty(0)
+    hal.pid.reset()
 
 
 async def _toggle():
