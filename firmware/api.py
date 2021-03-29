@@ -51,7 +51,7 @@ def set_pid_param(req, resp):
     if val < 0 or val > 100:
         raise Exception("Val in wrong range")
     setattr(hal.pid, param, val)
-    setattr(hal.config, param, val)
+    hal.config[param] = val
     hal.persist_config()
 
     yield from status(req, resp)
