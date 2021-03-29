@@ -21,6 +21,7 @@ def status(req, resp):
             "Kd": hal.pid.Kd,
             "countdown": controller.time_remaining,
             "period": hal.period,
+            "brightness": hal.disp.brightness(),
         }
     )
     yield from picoweb.start_response(resp, content_type="application/json")
@@ -50,6 +51,8 @@ def set_pid_param(req, resp):
     if val < 0 or val > 100:
         raise Exception("Val in wrong range")
     setattr(hal.pid, param, val)
+    setattr(hal.config, param, val)
+    hal.persist_config()
 
     yield from status(req, resp)
 
@@ -74,6 +77,17 @@ def set_pwm_freq(req, resp):
         raise Exception("Val in wrong range")
     hal.relay.freq(freq)
     hal.period = hal.relay._period
+    hal.config["freq"] = freq
+    hal.persist_config()
+    yield from status(req, resp)
+
+
+@app.route(re.compile("^/api/backlight/([1-9])"), methods=["PUT"])
+def set_brightness(req, resp):
+    br = int(req.url_match.group(1))
+    hal.disp.brightness(br)
+    hal.config["brightness"] = br
+    hal.persist_config()
     yield from status(req, resp)
 
 

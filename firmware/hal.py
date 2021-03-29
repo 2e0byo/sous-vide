@@ -10,12 +10,17 @@ import PID
 import tm1637
 from primitives.pushbutton import Pushbutton
 
-config = {"kp": 1, "ki": 0.5, "kd": 0.5, "brightness": 6}
+config = {"Kp": 1, "Ki": 0.5, "Kd": 0.5, "brightness": 6, "setpoint": 75, "freq": 0.005}
 try:
     with open("config.json") as f:
         config.update(json.load(f))
 except OSError:
     pass
+
+
+def persist_config():
+    with open("config.json", "w") as f:
+        f.write(json.dumps(config))
 
 
 class settablePin(Pin):
@@ -73,7 +78,7 @@ class softPWM:
             await asyncio.sleep_ms(self._period)
 
 
-relay = softPWM(relay_pin, freq=0.005, duty=0)
+relay = softPWM(relay_pin, freq=config["freq"], duty=0)
 period = relay._period
 buzzer = PWM(Pin(25), duty=0, freq=440)
 alarm_flag = False
@@ -231,7 +236,16 @@ encoder = EncoderTimed(rot_left, rot_right, False, 1)
 
 disp = tm1637.TM1637Decimal(clk=Pin(16), dio=Pin(17))
 
-pid = PID.PID(config["kp"], config["ki"], config["kd"], 75, None, (0, 1023), False)
+pid = PID.PID(
+    config["Kp"],
+    config["Ki"],
+    config["Kd"],
+    config["setpoint"],
+    None,
+    (0, 1023),
+    False,
+    True,
+)
 
 
 def init(loop):

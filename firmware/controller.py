@@ -68,6 +68,8 @@ async def _manual_start_controller():
     global heat_enabled
     hal.encoder.position = hal.temp * 10
     hal.pid.setpoint = await set_param("set ", 75, 100, 30)
+    hal.config["setpoint"] = hal.pid.setpoint
+    hal.persist_config()
     heat_enabled = True
 
 
