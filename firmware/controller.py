@@ -1,7 +1,10 @@
+import logging
+
 import uasyncio as asyncio
 
 import hal
 
+logger = logging.getLogger(__name__)
 heat_enabled = False
 time_remaining = False
 
@@ -57,8 +60,9 @@ async def heat_loop():
             hal.pid.set_auto_mode(True)
         while heat_enabled and hal.rom:
             val = hal.pid(hal.temp)
+            logger.info("pid yields: {val}")
             hal.relay.duty(round(val))
-            await asyncio.sleep_ms(hal.period)
+            await asyncio.sleep(5)
         hal.pid.set_auto_mode(False)
         hal.relay.duty(0)
         await asyncio.sleep(0.1)
