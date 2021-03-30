@@ -28,6 +28,15 @@ def status(req, resp):
     yield from resp.awrite(encoded)
 
 
+@app.route(re.compile("/api/setpoint/(.+)"))
+def set_setpoint(req, resp):
+    val = float(req.url_match.group(1))
+    if val < 0 or val > 100:
+        raise Exception("Invalid setpoint.")
+    hal.pid.setpoint = val
+    yield from status(req, resp)
+
+
 @app.route("/api/status/off")
 def off(req, resp):
     controller.stop_controller()
