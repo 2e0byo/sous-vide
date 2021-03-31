@@ -4,12 +4,14 @@ import ds18x20
 import micropython
 import onewire
 import uasyncio as asyncio
+import ulogging as logging
 from machine import PWM, Pin
 
 import PID
 import tm1637
 from primitives.pushbutton import Pushbutton
 
+logger = logging.getLogger(__name__)
 config = {"Kp": 1, "Ki": 0.5, "Kd": 0.5, "brightness": 6, "setpoint": 75, "freq": 0.005}
 try:
     with open("config.json") as f:
@@ -161,15 +163,24 @@ async def read_sensor(rom):
 async def temp_loop():
     global rom
     global temp
+    temps = []
+    avg = 10
+    i = 0
     while True:
         while not (rom := detect_sensor()):
+            logger.debug("No sensor found")
             await asyncio.sleep_ms(200)
+        temps = [await read_sensor(rom)] * avg
         while rom:
             try:
-                temp = await read_sensor(rom)
-            except (onewire.OneWireError, Exception):
+                temps[i] = await read_sensor(rom)
+                temp = sum(temps) / avg
+            except (onewire.OneWireError, Exception) as e:
+                logger.debug("read_sensor raised exception {}".format(e))
                 rom = None
             await asyncio.sleep_ms(250)
+        i += 1
+        i %= avg
 
 
 button = Pin(23, Pin.IN, Pin.PULL_UP)
