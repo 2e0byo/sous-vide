@@ -60,12 +60,14 @@ async def heat_loop():
             hal.pid.set_auto_mode(True)
         while heat_enabled and hal.rom:
             val = hal.pid(hal.temp)
-            logger.info("pid yields: {val}")
+            logger.info("pid yields: {}".format(round(val)))
+            logger.info(hal.pid.components)
             hal.relay.duty(round(val))
-            await asyncio.sleep(5)
+            await asyncio.sleep(10)
         hal.pid.set_auto_mode(False)
         hal.relay.duty(0)
-        await asyncio.sleep(0.1)
+        while not heat_enabled:
+            await asyncio.sleep(0.1)
 
 
 async def _manual_start_controller():
