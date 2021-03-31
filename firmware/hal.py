@@ -55,7 +55,7 @@ class softPWM:
         return 1023000 / self._period
 
     def duty(self, d=None):
-        if d:
+        if d is not None:
             if d < 0 or d > 1023:
                 raise Exception("Duty must be between 0 and 1023")
             old_duty = self._duty
