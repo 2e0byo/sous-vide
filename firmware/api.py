@@ -116,8 +116,9 @@ def manual_output(req, resp):
     yield from status(req, resp)
 
 
+
 async def run_app():
-    app.run(debug=True, host="0.0.0.0", port="80")
+    app.run(debug=-1, host="0.0.0.0", port="80")
 
 
 def init(loop):
