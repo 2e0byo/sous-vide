@@ -66,6 +66,12 @@ def set_pid_param(req, resp):
     yield from status(req, resp)
 
 
+@app.route("/api/pid/reset", methods=["PUT"])
+def reset_pid(req, resp):
+    hal.pid.reset()
+    yield from status(req, resp)
+
+
 @app.route(re.compile("^/api/countdown/start/([0-9]+)"), methods=["PUT"])
 def set_countdown(req, resp):
     secs = int(req.url_match.group(1))
