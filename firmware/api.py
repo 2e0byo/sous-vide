@@ -141,6 +141,15 @@ def autotune_status(req, resp):
     yield from resp.awrite(encoded)
 
 
+@app.route(re.compile("^/api/hal/temp/window/[0-9]*"))
+def set_temp_window(req, resp):
+    val = int(req.uril_match.group(1))
+    if val < 1:
+        raise Exception("Window must be at least 1 long!")
+    hal.avg = val
+    hal.temp_reset = True
+
+
 async def run_app():
     app.run(debug=-1, host="0.0.0.0", port="80")
 

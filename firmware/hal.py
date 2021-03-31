@@ -19,6 +19,9 @@ try:
 except OSError:
     pass
 
+avg = 15
+temp_reset = False
+
 
 def persist_config():
     with open("config.json", "w") as f:
@@ -163,24 +166,25 @@ async def read_sensor(rom):
 async def temp_loop():
     global rom
     global temp
+    global avg
     temps = []
-    avg = 10
     i = 0
     while True:
         while not (rom := detect_sensor()):
             logger.debug("No sensor found")
             await asyncio.sleep_ms(200)
         temps = [await read_sensor(rom)] * avg
-        while rom:
+        while rom and not temp_reset:
             try:
                 temps[i] = await read_sensor(rom)
                 temp = sum(temps) / avg
             except (onewire.OneWireError, Exception) as e:
-                logger.debug("read_sensor raised exception {}".format(e))
+                logger.debug("read_sensor raised exception {}.".format(e))
                 rom = None
             await asyncio.sleep_ms(250)
-        i += 1
-        i %= avg
+            i += 1
+            i %= avg
+        temp_reset = False
 
 
 button = Pin(23, Pin.IN, Pin.PULL_UP)
