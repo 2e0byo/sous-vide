@@ -116,6 +116,30 @@ def manual_output(req, resp):
     yield from status(req, resp)
 
 
+@app.route(re.compile("^/api/autotune/setpoint/(.+)"), methods=["PUT"])
+def autotune(req, resp):
+    controller.stop_controller()
+    temp = float(req.url_match.group(1))
+    controller.autotune(temp)
+    yield from status(req, resp)
+
+
+@app.route("/api/autotune/cancel", method=["PUT"])
+def cancel_autotune(req, resp):
+    controller.tuned = "cancelled"
+    yield from status(req, resp)
+
+
+@app.route("/api/autotune/status", methods=["PUT"])
+def autotune_status(req, resp):
+    if not controller.generated_params:
+        encoded = json.dumps({"status": "in progress"})
+    else:
+        encoded = json.dumps(controller.generated_params._asdict())
+
+    yield from picoweb.start_response(resp, content_type="application/json")
+    yield from resp.awrite(encoded)
+
 
 async def run_app():
     app.run(debug=-1, host="0.0.0.0", port="80")

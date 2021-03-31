@@ -1,12 +1,53 @@
-import logging
+import time
 
 import uasyncio as asyncio
+import ulogging as logging
 
 import hal
+from autotune import PIDAutotune
 
 logger = logging.getLogger(__name__)
 heat_enabled = False
 time_remaining = False
+
+autotuner = PIDAutotune(60, 1023, out_min=0, out_max=1023, time=time.time)
+tuned = False
+generated_params = []
+
+
+async def autotune_loop(temp):
+    global heat_enabled
+    global generated_params
+    global tuned
+    tuned = False
+    generated_params = []
+    before = heat_enabled
+    heat_enabled = False
+    tuned = False
+    autotuner._setpoint = temp
+    logger.info("Starting autotune loop")
+    while not tuned:
+        tuned = autotuner.run(hal.temp)
+        state = autotuner.state
+        hal.relay.duty(int(autotuner.output))
+        await asyncio.sleep(5)
+        if (s := autotuner.state) != state:
+            logger.info(s)
+    hal.relay.duty(0)
+    heat_enabled = before
+    if tuned == "cancelled":
+        logger.info("Cancelling autotune")
+        return
+    _params = []
+    for rule in autotuner.tuning_rules:
+        params = autotuner.get_pid_parameters(rule)
+        logger.info("rule {} yielded {}".format(rule, params))
+        _params.append(params)
+    generated_params = _params
+
+
+def autotune(temp):
+    asyncio.get_event_loop().create_task(autotune_loop(temp))
 
 
 async def set_param(
