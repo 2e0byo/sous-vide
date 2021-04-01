@@ -166,14 +166,15 @@ async def read_sensor(rom):
 async def temp_loop():
     global rom
     global temp
+    global temp_reset
     global avg
     temps = []
-    i = 0
     while True:
         while not (rom := detect_sensor()):
             logger.debug("No sensor found")
             await asyncio.sleep_ms(200)
         temps = [await read_sensor(rom)] * avg
+        i = 0
         while rom and not temp_reset:
             try:
                 temps[i] = await read_sensor(rom)
