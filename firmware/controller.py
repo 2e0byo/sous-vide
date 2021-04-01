@@ -102,10 +102,12 @@ async def heat_loop():
         if heat_enabled and hal.rom:
             hal.pid.set_auto_mode(True)
         while heat_enabled and hal.rom:
-            val = hal.pid(hal.temp)
-            logger.info("pid yields: {}".format(round(val)))
-            logger.info(hal.pid.components)
-            hal.relay.duty(round(val))
+            _duty = hal.relay.duty()
+            val = round(hal.pid(hal.temp))
+            if val != _duty:
+                logger.debug("pid yields: {}".format(val))
+                logger.debug(hal.pid.components)
+            hal.relay.duty(val)
             await asyncio.sleep(10)
         hal.pid.set_auto_mode(False)
         hal.relay.duty(0)
