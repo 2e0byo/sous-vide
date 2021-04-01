@@ -96,6 +96,8 @@ async def flash_disp():
 
 async def heat_loop():
     global heat_enabled
+    while not hal.temp:
+        await asyncio.sleep(1)
     while True:
         if heat_enabled and hal.rom:
             hal.pid.set_auto_mode(True)
