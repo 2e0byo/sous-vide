@@ -44,6 +44,7 @@ async def autotune_loop(temp):
         logger.info("rule {} yielded {}".format(rule, params))
         _params.append(params)
     generated_params = _params
+    assert generated_params, "Params not populated for some reason."
 
 
 def autotune(temp):
