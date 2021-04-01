@@ -14,6 +14,7 @@ def status(req, resp):
         {
             "status": controller.heat_enabled,
             "temperature": hal.temp,
+            "temperature_window": hal.avg,
             "setpoint": hal.pid.setpoint,
             "duty": hal.relay.duty(),
             "Kp": hal.pid.Kp,
@@ -141,13 +142,14 @@ def autotune_status(req, resp):
     yield from resp.awrite(encoded)
 
 
-@app.route(re.compile("^/api/hal/temp/window/[0-9]*"))
+@app.route(re.compile("^/api/hal/temp/window/[0-9]*"), methods=["PUT"])
 def set_temp_window(req, resp):
     val = int(req.uril_match.group(1))
     if val < 1:
         raise Exception("Window must be at least 1 long!")
     hal.avg = val
     hal.temp_reset = True
+    yield from status(req, resp)
 
 
 async def run_app():
