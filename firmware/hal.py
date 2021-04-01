@@ -65,7 +65,7 @@ class softPWM:
                 raise Exception("Duty must be between 0 and 1023")
             old_duty = self._duty
             self._duty = d
-            if self._duty > old_duty:
+            if self._duty != old_duty:
                 self._reset = True
         return self._duty
 
