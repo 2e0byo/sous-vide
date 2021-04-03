@@ -104,6 +104,8 @@ try:
                 await asyncio.sleep_ms(100)
 
     gc.collect()
+    gc.enable()  # likely pointless
+    gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
     loop.run_until_complete(main())
 except Exception as e:
     # start webrepl anyhow
