@@ -259,7 +259,7 @@ pid = PID.PID(
     config["setpoint"],
     sample_time=None,
     output_limits=(0, 1023),
-    proportional_on_measurement=True,
+    proportional_on_measurement=False,
     error_map=None,
 )
 
