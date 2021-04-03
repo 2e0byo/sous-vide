@@ -136,7 +136,14 @@ def autotune_status(req, resp):
     if not controller.generated_params:
         encoded = json.dumps({"status": "in progress"})
     else:
-        encoded = json.dumps(controller.generated_params._asdict())
+        encoded = {}
+        for i, name in enumerate(controller.autotuner.tuning_rules):
+            encoded[name] = {
+                "Kp": controller.generated_params[i].Kp,
+                "Ki": controller.generated_params[i].Ki,
+                "Kd": controller.generated_params[i].Kd,
+            }
+        encoded = json.dumps(encoded)
 
     yield from picoweb.start_response(resp, content_type="application/json")
     yield from resp.awrite(encoded)
