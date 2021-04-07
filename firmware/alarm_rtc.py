@@ -21,11 +21,14 @@ class AlarmRTC(machine.RTC):
         while True:
             now = time.time()
             for _, alarm in self._alarms.items():
-                if alarm[0] == now and alarm[1]:
-                    if type(alarm[1]).__name__ == "funcion":
-                        asyncio.get_event_loop().create_task(self.run_fn(alarm[1]))
-                    else:
-                        asyncio.get_event_loop().create_task(alarm[1]())
+                if alarm[0] == now:
+                    if alarm[1]:
+                        if type(alarm[1]).__name__ == "funcion":
+                            asyncio.get_event_loop().create_task(self.run_fn(alarm[1]))
+                        else:
+                            asyncio.get_event_loop().create_task(alarm[1]())
+                    if alarm[2]:
+                        alarm[0] = time.time() + alarm[2]
             await asyncio.sleep(1)  # 1s precision
 
     def alarm(self, id: int, time, *, repeat=False):
@@ -42,9 +45,11 @@ class AlarmRTC(machine.RTC):
         """
         try:
             time = time.time() + int(time)
+            periodic = int(time) if repeat else False
         except TypeError:
             time = time.mktime(time)
-        self._alarms[int(id)] = (time, None)
+            periodic = False
+        self._alarms[int(id)] = (time, None, periodic)
 
     def alarm_left(self, alarm_id: int = 0):
         """
