@@ -75,4 +75,4 @@ class AlarmRTC(machine.RTC):
 
     def irq(self, alarm_id, handler=None):
         """Set handler for alarm."""
-        self._alarms[int(id)][1] = handler
+        self._alarms[int(alarm_id)][1] = handler
