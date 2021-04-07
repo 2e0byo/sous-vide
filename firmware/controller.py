@@ -60,8 +60,9 @@ async def set_param(
     Click to exit.  Times out after timeout ms.
     """
     hal.display_lock = True
-    hal.disp.show(name_)
-    await asyncio.sleep(0.5)
+    if name_:
+        hal.disp.show(name_)
+        await asyncio.sleep(0.5)
 
     old_fns = hal.save_button_fns()
 
@@ -161,9 +162,9 @@ def manual_toggle(loop):
 
 async def _manual_start_countdown():
     global time_remaining
-    hours = await set_param("hrs ", 0, 23, 0, formatstr="{:0>2}.00", step=1)
+    hours = await set_param(None, 0, 23, 0, formatstr="{:0>2}.00", step=1)
     mins = await set_param(
-        "mins", 0, 59, 0, formatstr="{:02}".format(hours) + ".{:0>2}", step=1
+        None, 0, 59, 0, formatstr="{:02}".format(hours) + ".{:0>2}", step=1
     )
     time_remaining = hours * 3600 + mins * 60
 
