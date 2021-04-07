@@ -112,7 +112,7 @@ def stop_alarm():
     alarm_flag = False
 
 
-async def sound():
+async def sound(alarm_id=None):
     global alarm_flag
     alarm_flag = True
     old_fns = save_button_fns()
@@ -128,6 +128,8 @@ async def sound():
             await asyncio.sleep_ms(50)
         await asyncio.sleep(1)
     restore_button_fns(old_fns)
+    if alarm_id is not None:
+        rtc.cancel(alarm_id)
 
 
 seg = (27, 26, 33, 25, 14, 17, 16, 32)
