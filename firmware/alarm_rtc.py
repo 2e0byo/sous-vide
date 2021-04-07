@@ -58,7 +58,7 @@ class AlarmRTC(machine.RTC):
           alarm_id: int: alarm in question. (Default value = 0)
 
         Returns:
-          time in ms to the alarm.
+          time in s to the alarm.
         """
         return self._alarms[int(alarm_id)][0] - time.time()
 
