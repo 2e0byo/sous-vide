@@ -20,7 +20,7 @@ def status(req, resp):
             "Kp": hal.pid.Kp,
             "Ki": hal.pid.Ki,
             "Kd": hal.pid.Kd,
-            "countdown": controller.time_remaining,
+            "countdown": hal.rtc.alarm_left(0) if hal.rtc._alarms else False,
             "period": hal.period,
             "brightness": hal.disp.brightness(),
         }

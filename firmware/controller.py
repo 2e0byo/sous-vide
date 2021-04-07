@@ -8,7 +8,6 @@ from autotune import PIDAutotune
 
 logger = logging.getLogger(__name__)
 heat_enabled = False
-time_remaining = False
 
 autotuner = PIDAutotune(60, 1023, out_min=0, out_max=1023, time=time.time)
 tuned = False
