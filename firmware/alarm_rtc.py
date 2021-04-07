@@ -31,7 +31,7 @@ class AlarmRTC(machine.RTC):
                         alarm[0] = time.time() + alarm[2]
             await asyncio.sleep(1)  # 1s precision
 
-    def alarm(self, id: int, time, *, repeat=False):
+    def alarm(self, id: int, _time, *, repeat=False):
         """
         Set the RTC alarm.
 
@@ -44,12 +44,12 @@ class AlarmRTC(machine.RTC):
         Returns:
         """
         try:
-            time = time.time() + int(time)
-            periodic = int(time) if repeat else False
+            _time = time.time() + int(_time)
+            periodic = int(_time) if repeat else False
         except TypeError:
-            time = time.mktime(time)
+            _time = time.mktime(_time)
             periodic = False
-        self._alarms[int(id)] = (time, None, periodic)
+        self._alarms[int(id)] = (_time, None, periodic)
 
     def alarm_left(self, alarm_id: int = 0):
         """
