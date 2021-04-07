@@ -13,20 +13,22 @@ class AlarmRTC(machine.RTC):
         super().__init__()
 
     @staticmethod
-    async def run_fn(fn):
-        fn()
+    async def run_fn(fn, alarm_id):
+        fn(alarm_id)
 
     async def _alarm_loop(self):
         """Alarm loop to trigger fns if required."""
         while True:
             now = time.time()
-            for _, alarm in self._alarms.items():
+            for alarm_id, alarm in self._alarms.items():
                 if alarm[0] == now:
                     if alarm[1]:
                         if type(alarm[1]).__name__ == "funcion":
-                            asyncio.get_event_loop().create_task(self.run_fn(alarm[1]))
+                            asyncio.get_event_loop().create_task(
+                                self.run_fn(alarm[1], alarm_id)
+                            )
                         else:
-                            asyncio.get_event_loop().create_task(alarm[1]())
+                            asyncio.get_event_loop().create_task(alarm[1](alarm_id))
                     if alarm[2]:
                         alarm[0] = time.time() + alarm[2]
             await asyncio.sleep(1)  # 1s precision
