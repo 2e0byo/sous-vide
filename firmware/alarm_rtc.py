@@ -49,7 +49,7 @@ class AlarmRTC(machine.RTC):
         except TypeError:
             _time = time.mktime(_time)
             periodic = False
-        self._alarms[int(id)] = (_time, None, periodic)
+        self._alarms[int(id)] = [_time, None, periodic]
 
     def alarm_left(self, alarm_id: int = 0):
         """
