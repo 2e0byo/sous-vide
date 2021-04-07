@@ -9,6 +9,7 @@ from machine import PWM, Pin
 
 import PID
 import tm1637
+from alarm_rtc import AlarmRTC
 from primitives.pushbutton import Pushbutton
 
 logger = logging.getLogger(__name__)
@@ -262,6 +263,8 @@ pid = PID.PID(
     proportional_on_measurement=False,
     error_map=None,
 )
+
+rtc = AlarmRTC()
 
 
 def init(loop):

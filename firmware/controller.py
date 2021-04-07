@@ -161,40 +161,29 @@ def manual_toggle(loop):
 
 
 async def _manual_start_countdown():
-    global time_remaining
     hours = await set_param(None, 0, 23, 0, formatstr="{:0>2}.00", step=1)
     mins = await set_param(
         None, 0, 59, 0, formatstr="{:02}".format(hours) + ".{:0>2}", step=1
     )
     time_remaining = hours * 3600 + mins * 60
+    hal.rtc.cancel(0)
+    hal.rtc.alarm(0, time_remaining)
+    hal.rtc.irq(0, hal.sound)
 
 
 def manual_start_countdown(loop):
     loop.create_task(_manual_start_countdown())
 
 
-async def countdown_loop():
-    global time_remaining
-    while True:
-        while not time_remaining or not heat_enabled:
-            await asyncio.sleep(1)
-        while time_remaining and heat_enabled:
-            time_remaining -= 1
-            if time_remaining == 0:
-                asyncio.get_event_loop().create_task(hal.sound())
-            await asyncio.sleep(1)
-
-
 def start_countdown(secs):
-    global time_remaining
-    time_remaining = secs
+    hal.rtc.cancel(0)
+    hal.rtc.alarm(0, secs)
+    hal.rtc.irq(0, hal.sound)
 
 
 def stop_countdown():
-    global time_remaining
-    time_remaining = None
+    hal.rtc.cancel(0)
 
 
 def init(loop):
     loop.create_task(heat_loop())
-    loop.create_task(countdown_loop())
