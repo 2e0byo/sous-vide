@@ -181,7 +181,7 @@ async def countdown_loop():
         while time_remaining and heat_enabled:
             time_remaining -= 1
             if time_remaining == 0:
-                await hal.sound()
+                asyncio.get_event_loop().create_task(hal.sound())
             await asyncio.sleep(1)
 
 
