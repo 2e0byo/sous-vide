@@ -86,7 +86,7 @@ class softPWM:
 
 relay = softPWM(relay_pin, freq=config["freq"], duty=0)
 period = relay._period
-buzzer = PWM(Pin(25), duty=0, freq=440)
+buzzer = PWM(Pin(12), duty=0, freq=440)
 alarm_flag = False
 
 
