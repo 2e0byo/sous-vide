@@ -119,10 +119,12 @@ async def sound(alarm_id=None):
     button.double_func(stop_alarm)
     button.long_func(stop_alarm)
     button.release_func(stop_alarm)
-
+    duty = 16
     while alarm_flag:
+        if duty < 512:
+            duty += 32
         for i in range(4):
-            buzzer.duty(512)
+            buzzer.duty(duty)
             await asyncio.sleep_ms(50)
             buzzer.duty(0)
             await asyncio.sleep_ms(50)
