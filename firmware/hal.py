@@ -183,6 +183,7 @@ async def temp_loop():
         while rom and not temp_reset:
             try:
                 temps[i] = await read_sensor(rom)
+                logger.debug("Got {}".format(temps[i]))
                 temp = sum(temps) / avg
             except (onewire.OneWireError, Exception) as e:
                 logger.debug("read_sensor raised exception {}.".format(e))
