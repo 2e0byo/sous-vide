@@ -80,6 +80,12 @@ try:
                 for _ in range(5):
                     if hal.display_lock:
                         break
+                    if not isinstance(hal.temp, float):
+                        logger.warning(
+                            "hal.temp is not float but {} ({})".format(
+                                hal.temp, type(hal.temp)
+                            )
+                        )
                     disp_temp = str(hal.temp)[:4]
                     if "." not in disp_temp:
                         disp_temp = disp_temp[:3]
