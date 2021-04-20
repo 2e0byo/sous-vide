@@ -154,8 +154,15 @@ def detect_sensor():
 
     Returns rom if present else None.
     """
-    roms = ds.scan()
-    if len(roms) != 1:
+    try:
+        roms = ds.scan()
+    except Exception as e:
+        logger.debug("detect_sensor raised exception {}".format(e))
+        return None
+    no_roms = len(roms)
+    if no_roms > 0:
+        logger.debug("detected {} sensors attached; aborting".format(no_roms))
+    if no_roms != 1:
         return None
     else:
         return roms[0]
@@ -178,7 +185,11 @@ async def temp_loop():
         while not (rom := detect_sensor()):
             logger.debug("No sensor found")
             await asyncio.sleep_ms(200)
-        temps = [await read_sensor(rom)] * avg
+        try:
+            temps = [await read_sensor(rom)] * avg
+        except Exception as e:
+            logger.debug("read_sensor raised exception {}".format(e))
+            rom = None
         i = 0
         while rom and not temp_reset:
             try:
