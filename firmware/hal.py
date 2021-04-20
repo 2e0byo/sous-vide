@@ -160,7 +160,7 @@ def detect_sensor():
         logger.debug("detect_sensor raised exception {}".format(e))
         return None
     no_roms = len(roms)
-    if no_roms > 0:
+    if no_roms > 1:
         logger.debug("detected {} sensors attached; aborting".format(no_roms))
     if no_roms != 1:
         return None
