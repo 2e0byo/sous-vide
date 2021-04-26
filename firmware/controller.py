@@ -116,6 +116,13 @@ async def heat_loop():
             await asyncio.sleep(0.1)
 
 
+async def beep_at_temperature():
+    direction = -1 if hal.temp > hal.pid.setpoint else 1
+    while (hal.pid.setpoint - hal.temp) * direction > 0:
+        await asyncio.sleep(15)
+    await hal.sound()
+
+
 async def _manual_start_controller():
     global heat_enabled
     hal.encoder.position = hal.temp * 10
@@ -133,6 +140,7 @@ def start_controller():
     global heat_enabled
     heat_enabled = True
     hal.pid.auto_mode = True
+    asyncio.get_event_loop().create_task(beep_at_temperature())
 
 
 def stop_controller():
